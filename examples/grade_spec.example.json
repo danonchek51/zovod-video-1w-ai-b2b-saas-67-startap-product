@@ -1,0 +1,77 @@
+{
+  "spec": "grade",
+  "schema_version": 1,
+  "synthetic": true,
+  "timeline": "TIMELINE_NAME",
+  "cdl": {
+    "slope": {"r": 1.06, "g": 1.0, "b": 0.94},
+    "offset": {"r": 0.0, "g": 0.0, "b": 0.0},
+    "power": {"r": 1.0, "g": 1.0, "b": 1.0},
+    "saturation": 55
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "label": "01 Balance",
+      "role": "primary",
+      "primary": {
+        "lift": {"r": 0.03, "g": 0.03, "b": 0.03},
+        "gain": {"r": 1.06, "g": 1.0, "b": 0.94},
+        "offset": {"r": 0.0, "g": 0.0, "b": 0.0},
+        "saturation": 55,
+        "contrast": 1.05,
+        "pivot": 0.435,
+        "temperature": 0,
+        "tint": 0
+      }
+    },
+    {
+      "id": 2,
+      "label": "02 Contrast Curve",
+      "role": "curves",
+      "curves": {
+        "type": "custom_yrgb",
+        "y": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.25, "y": 0.24},
+          {"x": 0.5, "y": 0.52},
+          {"x": 0.75, "y": 0.76},
+          {"x": 1.0, "y": 1.0}
+        ],
+        "r": [],
+        "g": [],
+        "b": []
+      }
+    },
+    {
+      "id": 3,
+      "label": "03 Skin Window",
+      "role": "power_window",
+      "window": {
+        "type": "circle",
+        "size": 0.6,
+        "pan": 0.35,
+        "tilt": 0.75,
+        "soft": 0.05,
+        "gain": {"r": 1.12, "g": 1.08, "b": 1.0}
+      }
+    }
+  ],
+  "sequence": [1, 2, 3],
+  "apply": {
+    "tool": "tools/color/make_drx.js",
+    "command": "node tools/color/make_drx.js <spec.json> <out.drx>",
+    "note": "Спецификация грейда описывает намерение. Собранный DRX применяется в Resolve, и результат проверяется по составу тулов в узле и по рендеру, а не по флагу применения."
+  },
+  "verify": {
+    "expected_node_tools": ["Primary Balance", "Power Windows"],
+    "expected_nodes_count": 3,
+    "control_frames": ["frame_0001.png", "frame_0060.png", "frame_0120.png"],
+    "note": "Контрольные кадры снимаются в рабочем проекте Resolve. В одноразовом проекте (песочнице) экспорт кадра может вернуть чёрный кадр — визуальная проверка там невозможна."
+  },
+  "metrics": [
+    {"metric": "nodes_applied", "value": 3, "norm": "= 3", "verdict": "PASS"},
+    {"metric": "tool_list_match", "value": 1, "norm": "= 1 (ожидаемый набор тулов в узле)", "verdict": "PASS"}
+  ],
+  "verdict": "PASS"
+}

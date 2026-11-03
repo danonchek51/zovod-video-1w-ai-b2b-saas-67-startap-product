@@ -1,0 +1,49 @@
+# Локальные настройки конкретной машины — не публикуем
+config/env.json
+config/*.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Артефакты работы (в пакете их быть не должно)
+project/
+work/
+/reports/
+*.log
+*.tmp
+*.bak
+*.drp
+*.drt
+*.drx
+
+# Медиа и картинки — защита от случайного коммита чужого материала.
+# Исключения: синтетические примеры в examples/ и фикстуры MIT-вендора в vendor/.
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.m4v
+*.wav
+*.mp3
+*.aac
+*.png
+*.jpg
+*.jpeg
+!examples/**
+!vendor/**
+
+# ВАЖНО: правила-исключения выше отменяют игнор, поэтому node_modules
+# исключается ещё раз — после них. npm-зависимости ставятся на месте:
+# cd vendor && npm install
+node_modules/
+vendor/node_modules/
+
+# OS / редакторы
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

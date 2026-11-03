@@ -1,0 +1,24 @@
+{
+  "report": "envelope_correlation",
+  "schema_version": 1,
+  "synthetic": true,
+  "reference": "clip_0001_source.wav",
+  "candidate": "clip_0001_cut.mp4",
+  "method": "envelope RMS window=40ms hop=10ms sr=48000 mono, lag search +/-3 frames, tool=tools/audio/verify_energy.py",
+  "fps": 25,
+  "chunks": [
+    {"chunk_id": "ch_00", "src_start_s": 0.0, "cut_start_s": 0.0, "length_s": 18.4, "correlation": 0.996, "shift_s": 0.0, "shift_frames": 0.0},
+    {"chunk_id": "ch_01", "src_start_s": 18.4, "cut_start_s": 18.4, "length_s": 12.1, "correlation": 0.993, "shift_s": 0.01, "shift_frames": 0.25},
+    {"chunk_id": "ch_02", "src_start_s": 30.5, "cut_start_s": 30.5, "length_s": 9.8, "correlation": 0.988, "shift_s": 0.02, "shift_frames": 0.5},
+    {"chunk_id": "ch_03", "src_start_s": 40.3, "cut_start_s": 39.9, "length_s": 7.6, "correlation": 0.991, "shift_s": 0.03, "shift_frames": 0.75}
+  ],
+  "mean": 0.992,
+  "worst": {"chunk_id": "ch_02", "correlation": 0.988, "shift_frames": 0.5},
+  "max_shift_frames": 0.75,
+  "max_shift_s": 0.03,
+  "metrics": [
+    {"metric": "mean_correlation", "value": 0.992, "norm": ">= 0.99", "verdict": "PASS"},
+    {"metric": "max_shift_frames", "value": 0.75, "norm": "< 1", "verdict": "PASS"}
+  ],
+  "verdict": "PASS"
+}

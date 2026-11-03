@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "synthetic": true,
+  "job": {
+    "expect_timeline": "TIMELINE_NAME",
+    "expect_fps": 25,
+    "expect_duration_s": 120.0,
+    "report_path": "<project_root>/reports/stage7_verify_20260101.json"
+  },
+  "timeline": "TIMELINE_NAME",
+  "project": "PROJECT_NAME",
+  "fps": 25.0,
+  "start_frame": 0,
+  "end_frame": 3000,
+  "duration_s": 120.0,
+  "start_timecode": "00:00:00:00",
+  "tracks": {
+    "video": [
+      {
+        "index": 1,
+        "name": "V1",
+        "items": 14,
+        "clips": 12,
+        "transitions": 2,
+        "transition_spans": [
+          {"start": 480, "end": 500, "len": 20, "name": "Cross Fade", "kind": "transition"},
+          {"start": 1440, "end": 1460, "len": 20, "name": "Cross Fade", "kind": "transition"}
+        ],
+        "coverage_s": 120.0,
+        "gaps": [],
+        "overlaps": [],
+        "zero_length": []
+      },
+      {
+        "index": 2,
+        "name": "V2",
+        "items": 6,
+        "clips": 6,
+        "transitions": 0,
+        "transition_spans": [],
+        "coverage_s": 120.0,
+        "gaps": [],
+        "overlaps": [],
+        "zero_length": []
+      }
+    ],
+    "audio": [
+      {
+        "index": 1,
+        "name": "A1",
+        "items": 12,
+        "clips": 12,
+        "transitions": 0,
+        "transition_spans": [],
+        "coverage_s": 120.0,
+        "gaps": [],
+        "overlaps": [],
+        "zero_length": []
+      },
+      {
+        "index": 2,
+        "name": "A2",
+        "items": 3,
+        "clips": 3,
+        "transitions": 0,
+        "transition_spans": [],
+        "coverage_s": 120.0,
+        "gaps": [],
+        "overlaps": [],
+        "zero_length": []
+      }
+    ]
+  },
+  "markers": {
+    "0": "INTRO",
+    "720": "BLOCK_A",
+    "1440": "BLOCK_B",
+    "2400": "OUTRO"
+  },
+  "checks": {
+    "duration_s": {"expected": 120.0, "actual": 120.0, "delta_s": 0.0, "pass": true},
+    "fps": {"expected": 25, "actual": 25.0, "pass": true},
+    "timeline": {"expected": "TIMELINE_NAME", "actual": "TIMELINE_NAME", "pass": true}
+  },
+  "problems": [],
+  "pass": true
+}

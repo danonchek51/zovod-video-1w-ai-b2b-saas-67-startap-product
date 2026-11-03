@@ -1,0 +1,10 @@
+{
+  "name": "zovod-video-env-vendor",
+  "private": true,
+  "description": "Вендорные кодеки DRX/DRP для пакета ZOVod Video (MIT).",
+  "license": "MIT",
+  "dependencies": {
+    "fzstd": "^0.1.1",
+    "zstd-codec": "^0.1.5"
+  }
+}

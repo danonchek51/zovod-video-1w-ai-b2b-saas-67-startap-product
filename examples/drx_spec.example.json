@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "label": "Example Grade",
+    "width": 3840,
+    "height": 2160,
+    "sourceTimeline": "TIMELINE_NAME",
+    "sourceTC": "00:00:00:00",
+    "recordTC": "01:00:00:00",
+    "resolveVersion": "21.1.1"
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "xPos": 190,
+      "yPos": 180,
+      "label": "01 Balance",
+      "enabled": true,
+      "params": {
+        "lift": {"r": 0.03, "g": 0.03, "b": 0.03},
+        "gain": {"r": 1.06, "g": 1.0, "b": 0.94},
+        "offset": {"r": 0.0, "g": 0.0, "b": 0.0},
+        "saturation": 55,
+        "contrast": 1.05,
+        "pivot": 0.435
+      }
+    },
+    {
+      "id": 2,
+      "xPos": 460,
+      "yPos": 180,
+      "label": "02 Contrast Curve",
+      "enabled": true,
+      "params": {
+        "customCurves": {
+          "y": [
+            {"x": 0.0, "y": 0.0},
+            {"x": 0.25, "y": 0.24},
+            {"x": 0.5, "y": 0.52},
+            {"x": 0.75, "y": 0.76},
+            {"x": 1.0, "y": 1.0}
+          ],
+          "r": [],
+          "g": [],
+          "b": []
+        },
+        "lift": {"r": 0.0, "g": 0.0, "b": 0.0},
+        "gain": {"r": 1.0, "g": 1.0, "b": 1.0},
+        "offset": {"r": 0.0, "g": 0.0, "b": 0.0}
+      }
+    },
+    {
+      "id": 3,
+      "xPos": 730,
+      "yPos": 180,
+      "label": "03 Skin Window",
+      "enabled": true,
+      "params": {
+        "lift": {"r": 0.0, "g": 0.0, "b": 0.0},
+        "gain": {"r": 1.0, "g": 1.0, "b": 1.0},
+        "offset": {"r": 0.0, "g": 0.0, "b": 0.0},
+        "window": {
+          "type": "circle",
+          "size": 0.6,
+          "pan": 0.35,
+          "tilt": 0.75,
+          "soft": 0.05,
+          "gain": {"r": 1.12, "g": 1.08, "b": 1.0}
+        }
+      }
+    }
+  ],
+  "connections": [
+    {"from": 1, "to": 2},
+    {"from": 2, "to": 3}
+  ],
+  "_notes": {
+    "synthetic": "Все значения синтетические: пример формы, а не рабочий грейд.",
+    "command": "node tools/color/make_drx.js examples/drx_spec.example.json <out.drx>",
+    "nodes": "nodes[] — параметры узла в params: lift/gain/offset (r,g,b), saturation, contrast, pivot, customCurves {y,r,g,b: [{x,y}]}, window {type,size,pan,tilt,soft,gain}. Пустые массивы кривых означают тождественную кривую.",
+    "connections": "connections[] — {from,to} в 1-based индексации массива nodes (генератор сам добавляет базовое смещение идентификаторов).",
+    "metadata": "metadata — label, width, height, sourceTimeline, sourceTC, recordTC, resolveVersion.",
+    "verify": "После сборки DRX: применить в Resolve и сверить состав тулов в узле (GetToolsInNode) и контрольный рендер — флаг применения сам по себе ничего не доказывает."
+  }
+}

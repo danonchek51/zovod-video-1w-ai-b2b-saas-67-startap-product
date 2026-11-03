@@ -1,0 +1,15 @@
+{
+  "report": "audio_verify",
+  "schema_version": 1,
+  "synthetic": true,
+  "asset": "clip_0001_cut.mp4",
+  "method": "window=40ms hop=10ms sr=48000 ch=2 (L+R mix), tool=tools/audio/measure_audio.py",
+  "metrics": [
+    {"metric": "rms_dbfs", "value": -18.24, "norm": "-20..-12 dBFS", "verdict": "PASS"},
+    {"metric": "peak_dbfs", "value": -1.5, "norm": "<= -1.5 dBFS", "verdict": "PASS"},
+    {"metric": "clipping_pct", "value": 0.0, "norm": "= 0.00 %", "verdict": "PASS"},
+    {"metric": "silence_windows", "value": 0, "norm": "= 0", "verdict": "PASS"},
+    {"metric": "speech_rms_dbfs", "value": -18.24, "norm": "-20..-12 dBFS", "verdict": "PASS"}
+  ],
+  "verdict": "PASS"
+}

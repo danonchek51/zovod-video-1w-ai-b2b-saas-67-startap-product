@@ -1,0 +1,14 @@
+# Текст — всегда LF, чтобы одинаково на Windows и macOS.
+* text=auto eol=lf
+
+# Бинарное — не трогать
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.drp binary
+*.drx binary
+*.drt binary
+*.wav binary
+*.mp4 binary
+*.mov binary
+*.hex binary
