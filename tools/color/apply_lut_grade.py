@@ -145,8 +145,12 @@ def main():
     # Фаза 1: установить все .cube в папку LUT Resolve.
     # Порядок важен: RefreshLUTList() должен идти ПОСЛЕ копирования, иначе
     # Resolve не знает о новых файлах и SetLUT возвращает False.
+    # ZOVOD_LUT_NO_INSTALL=1 - использовать пути из плана как есть (LUT уже
+    # установлена): нужно, когда имена важны (например, при восстановлении
+    # проекта из .drp/БД, где ноды ссылаются на конкретные имена файлов).
+    no_install = str(env("ZOVOD_LUT_NO_INSTALL", "")).strip().lower() in ("1", "true", "yes")
     installed = {}
-    if not dry_run:
+    if not dry_run and not no_install:
         for it in plan.get("items", []):
             src = it.get("lut")
             if not src or not os.path.exists(src) or src in installed:
@@ -160,6 +164,7 @@ def main():
             R["refresh_after_install"] = True
         except Exception as e:
             R["refresh_error_after_install"] = repr(e)
+    R["no_install"] = no_install
 
     ok_n = fail_n = 0
     for i, it in enumerate(plan.get("items", [])):
@@ -172,7 +177,7 @@ def main():
                 R["results"].append(rec)
                 fail_n += 1
                 continue
-            dst = src if dry_run else installed.get(src)
+            dst = src if dry_run else (src if no_install else installed.get(src))
             if not dst:
                 rec["error"] = "LUT не установлен"
                 R["results"].append(rec)

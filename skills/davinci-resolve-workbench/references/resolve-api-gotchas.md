@@ -38,6 +38,7 @@ calls.
 | `ApplyGradeFromDRX` **crashes Resolve** (process dies, crash dialog) | Reproducible on clips overlapped by a transition (4 crashes in one session: V2@93179, V1@90309, V1@93285, V1@93285 C0141_cut) | Do not call it on a live timeline. If a multi-node grade is required, apply the DRX by hand in the Color page (the file path is known) or bake it into the LUT |
 | A grade looks right in the viewer but the render does not change | The single-frame render path does not always carry the grade | Prove the grade with an A/B render: same frame with and without the LUT, then compare pixel-wise (see `docs/COLOR_LOOK.md` § «Проверка грейда») |
 | `ExportCurrentFrameAsStill` shows no colour change | It exports the colour branch only in some builds | Verify the grade by rendering, not by still export |
+| A `.drp` export seems to contain no grade — `grep` finds no `.cube` and no LUT name | Resolve stores strings inside its XML **hex-encoded** (`FieldsBlob`), so plain-text search misses them | Never judge a `.drp` by grepping it. Import it and read the graph back: `GetLUT(1)` and `GetToolsInNode(1)` on every planned clip |
 
 ## Fusion
 
