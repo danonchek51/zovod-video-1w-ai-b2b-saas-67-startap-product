@@ -214,7 +214,9 @@ def main():
             print(text_of(client.call(tool, args)))
         elif mode == "script":
             path = os.path.abspath(sys.argv[2])
-            with open(path, "r", encoding="utf-8") as f:
+            # utf-8-sig: скрипты, записанные через PowerShell Set-Content, несут BOM —
+            # с обычным utf-8 такой файл падает с "invalid non-printable character U+FEFF"
+            with open(path, "r", encoding="utf-8-sig") as f:
                 code = f.read()
             unsafe = "--unsafe" in sys.argv
             tool = "run_script_unsafe" if unsafe else "run_script"

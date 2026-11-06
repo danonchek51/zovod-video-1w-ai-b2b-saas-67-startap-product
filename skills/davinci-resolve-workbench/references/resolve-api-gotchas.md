@@ -10,21 +10,33 @@ calls.
 | Symptom | Cause | Workaround |
 |---|---|---|
 | A running render dies and the queue looks empty | `pm.LoadProject(name)` switches the *current* project; the queue belongs to the project you left | Status/polling scripts must use `pm.GetCurrentProject()` only. Call `LoadProject` only when the name differs, and never inside a polling loop |
-| `ExportProject` raises `'NoneType' object is not callable` | Not exposed in this build | The project lives in Resolve's database. Promise the project/timeline name, not a `.drp` file |
+| `pm.ExportProject(name, path)` raised `'NoneType' object is not callable` in older notes | **It works** (verified 06.11.2026): returns `True` and writes a real `.drp` (~1 MB for a 90-minute project) | Use it for rollback points: `pm.SaveProject()` → `pm.ExportProject(project.GetName(), drp)` → copy `Project.db`. See `tools/resolve_checkpoint.py` |
+| Every mutation suddenly returns `False` (`SaveProject`, `ApplyGradeFromDRX`, `SetLUT`) | The **Project Manager** window is in front, not the Edit page | `resolve.OpenPage("edit")` before mutating and check `resolve.GetCurrentPage() == "edit"` |
+| `project` (the injected object) refers to a closed/other project | After a Resolve restart the injected handle is stale | Always take the project fresh: `resolve.GetCurrentProject()` |
 | `GetTimelineList()`, `tl.GetPropertyList()`, `ti.GetPropertyList()` raise `'NoneType' object is not callable` | Not exposed | Use `GetCurrentTimeline()` and specific getters; enumerate by other means |
-| `ti.GetProperty("Stabilization")` returns `False` while stabilization is active | Property is not readable through the API | `ti.Stabilize()` returning `True` is the only signal. Verify the effect by measuring frame-to-frame motion in the rendered output |
+| `ti.GetProperty("Stabilization")` returns `False` while stabilization is active | Property is not readable through the API | `ti.Stabilize()` returning `True` is the only signal. Verify the effect by measuring frame-to-motion in the rendered output |
+| `project.GetSetting("colorSpaceOutputGamma")` kills Resolve / always returns the same value | Unknown keys abort the call; the output gamma is not writable through the API | Read only `project.GetSettings()` (a dict of ~158 keys). To change the output gamma use the UI: Shift+9 → Color Management → Output Gamma |
 | Timeline frame numbers look huge (`90000..90988`) | Projects can start at a non-zero frame offset | All frame-index APIs (render `MarkIn`/`MarkOut`, `GetStart`/`GetEnd`) use the same absolute numbering — do not treat them as 0-based |
+| A crash dialog «Отчёт о проблемах DaVinci Resolve» ignores clicks and blocks every script call | It is a Qt window, not a modal the API can dismiss | `tools/dismiss_dialogs.py` does not recognise it (template says «Отчет», the window says «Отчёт»). Kill and relaunch Resolve instead, then `pm.LoadProject(name)` |
 
 ## Color page / node graph
 
 | Symptom | Cause | Workaround |
 |---|---|---|
 | No way to add nodes to the graph | `Graph` in the scripting API exposes only `SetLUT`, `SetNodeEnabled`, `ResetAllGrades`, `GetToolsInNode`, `GetLUT`, `GetNumNodes` — there is no `AddNode` | Script one Color node carrying the LUT, and move every other stage into the Fusion comp. Encode WB/exposure inside the LUT instead of building 4 nodes |
-| `SetCDL` on the clip blows the image out (measured transfer ≈ `y = 1.19·x^0.196` instead of the intended linear mapping) | Resolve applies the CDL with its own transfer curve | Do not use `SetCDL`. Put WB/exposure in the LUT and apply the CDL in the offline post pass with the same math the preview used |
+| `SetCDL` paints the whole clip **red** (measured means R 192 / G 46 / B 46) | Resolve applies the CDL with its own transfer curve | Do not use `SetCDL` for grade at all. Put WB/exposure/curve into the LUT and apply the CDL in the offline post pass with the same math the preview used |
+| `SetCDL` returns `False` although the dictionary looks right | The API rejects the whole dict if it contains **any unexpected key** (e.g. a leftover `"err": 0.035` from a fit report) | Pass exactly the five documented keys: `NodeIndex`, `Slope`, `Offset`, `Power`, `Saturation`. Strip everything else before calling |
 | `SetCDL({"NodeIndex": 2, ...})` returns `False` | There is no node 2 | `SetCDL` can only address node 1 |
-| Disabling a node cannot be undone reliably | `SetNodeEnabled` is not a clean round-trip | Recover with `ResetAllGrades()` then `SetLUT(1, absolute_path)` |
-| LUT seems applied but the picture is unchanged | Relative path or wrong folder | Install the cube in `…\DaVinci Resolve\Support\LUT\MCP\` and reference it as `MCP\Name.cube`; elsewhere use an absolute path. Confirm with `ti.GetNodeGraph(1).GetLUT(1)` |
-| `ApplyGradeFromDRX` does nothing | Malformed/unsupported DRX | Do not rely on it; build the grade from LUT + Fusion |
+| Disabling a node cannot be undone reliably | `SetNodeEnabled` is not a clean round-trip: re-enabling resets the node's tools (the CDL disappears) | Recover with `ResetAllGrades()` then `SetLUT(1, absolute_path)` |
+| `SetLUT(1, path)` returns `False` although the file exists | **An absolute path outside Resolve's LUT folder is rejected.** Only a file inside `…\DaVinci Resolve\Support\LUT\` (any subfolder, e.g. `MCP\`) is accepted | Copy the cube into the LUT folder, call `project.RefreshLUTList()`, then `SetLUT(1, <absolute path inside that folder>)`. Confirm with `GetLUT(1)` — it returns the path **relative to the LUT folder** (`MCP\Name.cube`) |
+| `SetLUT` returns `False` right after copying a new cube | `RefreshLUTList()` ran **before** the file was copied, so Resolve does not know it | Order is fixed: copy all cubes → `RefreshLUTList()` → `SetLUT` |
+| The LUT file was edited on disk but the picture did not change | Resolve keeps the previously read LUT | Force a re-read: `SetLUT(1, "")` and then `SetLUT(1, path)` |
+| `GetNodeGraph()` returns `None` | The item is a **transition**, not a clip — transitions have no colour graph | Find the clip by name, not only by start frame: a transition and a clip can share the same start frame |
+| The wrong clip got the grade | Selection by start frame picked the transition that starts at the same frame | Select by (track, start) **and** name; skip items without a graph |
+| `ApplyGradeFromDRX` returns `True` but the picture is unchanged | Malformed/unsupported DRX | Do not rely on it; build the grade from LUT + Fusion |
+| `ApplyGradeFromDRX` **crashes Resolve** (process dies, crash dialog) | Reproducible on clips overlapped by a transition (4 crashes in one session: V2@93179, V1@90309, V1@93285, V1@93285 C0141_cut) | Do not call it on a live timeline. If a multi-node grade is required, apply the DRX by hand in the Color page (the file path is known) or bake it into the LUT |
+| A grade looks right in the viewer but the render does not change | The single-frame render path does not always carry the grade | Prove the grade with an A/B render: same frame with and without the LUT, then compare pixel-wise (see `docs/COLOR_LOOK.md` § «Проверка грейда») |
+| `ExportCurrentFrameAsStill` shows no colour change | It exports the colour branch only in some builds | Verify the grade by rendering, not by still export |
 
 ## Fusion
 
@@ -96,6 +108,25 @@ fails silently.
 | Bridge output looks like `{"output": "…"}` instead of raw text | The MCP server returns the result as a plain object on some calls | Parse both shapes; print flat `key=value` markers from inside Resolve instead of JSON to avoid escaping problems |
 | A script cannot write files | `run_script` is sandboxed | Use the bridge's `--unsafe` flag (`run_script_unsafe`) when filesystem writes are required |
 | Bridge scripts "see" an undefined name such as `project` | The script relies on injected globals that are absent when the project cannot be resolved | Resolve the project inside the script (`resolve.GetProjectManager().GetCurrentProject()`) and guard every call |
+| The script produced no output at all and wrote no file | `sys.exit()` inside the Resolve context is swallowed by the MCP server, and `__name__` is not `"__main__"` | Do not use `sys.exit()`; call `main()` at the end of the module and print a marker line (`LUT_JSON:…`) |
+| `NameError: name '__file__' is not defined` | The script is executed from a string, not from a file | Use `os.getcwd()` as a fallback, or pass paths through environment variables |
+| `NameError: name 'globals' is not defined` | The sandboxed `run_script` has no `globals` builtin | In `run_script` use the injected names directly (`resolve`, `project`); the bridge variant does provide `globals()` |
+| `SyntaxError: invalid non-printable character U+FEFF` | The script was written by PowerShell `Set-Content -Encoding UTF8`, which adds a BOM | The bridge reads scripts as `utf-8-sig`; for other readers strip the BOM or write with `utf-8` without BOM |
+
+## Scripts executed inside Resolve
+
+The MCP server compiles the script from a string and runs it in Resolve's own
+Python. Three rules follow from that, and all three cost a cycle if forgotten:
+
+1. **No `sys.exit()`.** The server swallows it — the call returns "no output".
+2. **No `__file__`, no `globals()`** in the sandboxed `run_script`. Use
+   `os.getcwd()` and the injected names.
+3. **The script must not depend on the caller's working directory.** Pass paths
+   through environment variables (`ZOVOD_*`) — the bridge forwards the
+   environment of the calling shell.
+
+Everything else behaves like normal Python 3.
+
 
 ## ffmpeg / numpy
 

@@ -128,6 +128,9 @@ python skills/davinci-resolve-workbench/scripts/media_probe.py <папка с и
 | что работает в API Resolve, а что падает | `docs/RESOLVE_RECIPE.md` |
 | типовые отказы и как их откатывать | `docs/FAILURE_MODES.md` |
 | грейд, DRX, power window, контрольные кадры | `docs/COLOR_LOOK.md` |
+| **быстрый путь: накатить готовый грейд на клипы** | `docs/COLOR_LOOK.md` §2.1 → `tools/color/apply_lut_grade.py` |
+| **проверить, что .cube не сломан** | `tools/color/verify_lut.py` |
+| **точка отката состояния Resolve (.drp + БД)** | `tools/resolve_checkpoint.py` |
 | как мерить (RMS, клиппинг, корреляция огибающих) | `docs/MEASUREMENT.md` |
 | какой инструмент для какой задачи | `tools/MANIFEST.md` |
 | лицензии и атрибуция | `docs/LEGAL_ASSETS.md` |
@@ -140,10 +143,13 @@ python skills/davinci-resolve-workbench/scripts/media_probe.py <папка с и
 |---|---|
 | Resolve не отвечает на скрипты | `docs/FAILURE_MODES.md` — раздел про краш и модалки |
 | «скрипт вернул True, но ничего не изменилось» | `docs/RESOLVE_RECIPE.md` — DRX: флаг ≠ результат |
+| цвет стал красным после `SetCDL` | `docs/FAILURE_MODES.md` §26 — грейд только через LUT |
+| Resolve умер после `ApplyGradeFromDRX` | `docs/FAILURE_MODES.md` §27 — DRX на клипах под переходом |
+| `SetLUT` вернул `False` | `docs/FAILURE_MODES.md` §28 — три разные причины |
 | звук «пропал» в кусках | `docs/AUDIO_RECIPE.md` — разбор про шумоподавление |
 | таймкоды не бьются с картинкой | `docs/MEASUREMENT.md` — синхронизация по огибающей |
 | Python ругается на кодировку | `docs/FAILURE_MODES.md` — BOM и `utf-8-sig` |
-| нужно откатить | `python tools/checkpoint.py list`, затем `restore <метка>` |
+| нужно откатить | `python tools/checkpoint.py list`, затем `restore <метка>`; состояние Resolve — `tools/resolve_checkpoint.py` |
 
 ---
 
